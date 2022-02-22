@@ -2,6 +2,9 @@
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import cx from "classnames";
+import {AuthService} from '../../Services/Auth'
+import { useDispatch } from "react-redux";
+import { setUser } from "../../Reducers/Auth";
 
 const Schema = Yup.object().shape({
     email: Yup.string().required("Required").email(),
@@ -9,6 +12,7 @@ const Schema = Yup.object().shape({
 });
 
 const BasicAuth = () => {
+    const dispatch = useDispatch()
 
     const formik = useFormik({
         initialValues: {
@@ -21,7 +25,14 @@ const BasicAuth = () => {
             values,
             { setFieldError, setSubmitting, resetForm }
         ) => {
-            console.log('should submit here')
+            setSubmitting(true)
+            const response = await AuthService.login(values.email, values.password);
+            
+            if(response){
+                const user = response as any
+                dispatch(setUser({user}))
+            }
+            setSubmitting(false)
         },
     });
 
